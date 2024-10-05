@@ -8,25 +8,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { UploadRow } from "@/lib/types";
+import { RetrievedUploadRow } from "@/lib/types";
 import {
   ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import PreviewButton from "./preview-button";
 
-const columns: ColumnDef<UploadRow>[] = [
+const columns: ColumnDef<RetrievedUploadRow>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "upload.visionAnalysis.title",
     header: "Title",
   },
   {
-    accessorKey: "altText",
+    accessorKey: "upload.visionAnalysis.altText",
     header: "Alt Text"
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: ({ column }) => {
       return (
         <Button
@@ -39,20 +41,28 @@ const columns: ColumnDef<UploadRow>[] = [
       )
     },
     cell: ({ row }) => {
-      const createdAt = new Date(row.getValue("createdAt"));
+      const createdAt = new Date(row.getValue("created_at"));
       const formatted = createdAt.toLocaleString();
  
       return <div className="text-right font-medium">{formatted}</div>;
     },
+  },
+  {
+    accessorKey: "upload.pinataCid",
+    header: "Preview",
+    cell: ({row}) => {
+      return <PreviewButton cid={row.original.upload.pinataCid} />
+    }
   }
 ];
 
 type Props = {
-  data: UploadRow[]
+  data: RetrievedUploadRow[]
 };
 
-export default function UploadsTable({ data }: Props) {
+export default function UploadsTable(props: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [data, setData] = useState(props.data);
   const table = useReactTable({
     data,
     columns,
@@ -63,6 +73,27 @@ export default function UploadsTable({ data }: Props) {
       sorting,
     },
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime uploads")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "uploads"
+        },
+        (payload) => {
+          setData([...data, payload.new as RetrievedUploadRow]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase])
 
   return (
     <div className="rounded-md border max-w-7xl mx-auto mt-10">

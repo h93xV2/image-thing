@@ -7,8 +7,23 @@ const ImageAnalysisResultObject = z.object({
 });
 type ImageAnalysisResult = z.infer<typeof ImageAnalysisResultObject>;
 
-type UploadRow = ImageAnalysisResult & {
-  createdAt: string,
+type UploadRow = {
+  upload: {
+    visionAnalysis: ImageAnalysisResult,
+    exifData?: any,
+    pinataCid: string
+  },
+  hash: string
 };
 
-export {ImageAnalysisResultObject, type ImageAnalysisResult, type UploadRow}
+type RetrievedUploadRow = UploadRow & {
+  created_at: string,
+};
+
+type FileData = {
+  buffer: Buffer,
+  file: File,
+  imageHash: string
+}
+
+export {ImageAnalysisResultObject, type ImageAnalysisResult, type RetrievedUploadRow, type FileData, type UploadRow}

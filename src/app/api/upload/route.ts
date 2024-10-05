@@ -1,22 +1,12 @@
-import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod.mjs";
-import { PinataSDK } from "pinata";
 import * as tmp from "tmp";
 import * as fs from "fs";
 import path from "path";
 import exifr from "exifr";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { ImageAnalysisResultObject } from "@/lib/types";
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.PINATA_GATEWAY,
-});
-const openAi = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
-});
-const supabase = createClient(process.env.SUPABASE_PROJECT_URL!, process.env.SUPABASE_ANON_KEY!); // TODO: Add auth later with user keys
+import { getVisionAnalysisResult } from "@/lib/openai";
+import { getNewFileUploads, supabase } from "@/lib/supabase";
+import pinata from "@/lib/pinata";
+import { UploadRow } from "@/lib/types";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -26,11 +16,11 @@ export async function POST(request: Request) {
 
   console.log(`tmpDir ${tmpDir.name}`);
 
-  for (let i = 0; i < files.length; i ++) {
-    // TODO: Check if file already uploaded. Use some kind of hash/cache.
-    const file = files[i];
-    const upload = await pinata.upload.file(file); // TODO: Handle exceptions
-    const buffer = Buffer.from(await file.arrayBuffer());
+  const newFiles = await getNewFileUploads(files);
+
+  for (let i = 0; i < newFiles.length; i++) {
+    const {file, buffer, imageHash} = newFiles[i];
+    const upload = await pinata.upload.file(file); // TODO: Handle exceptions and prevent reuploading
     const type = file.type; // TODO: Validate this is an image. Ex: image/jpeg
     const tempFilePath = path.join(tmpDir.name, file.name);
 
@@ -42,44 +32,28 @@ export async function POST(request: Request) {
 
     console.log(`EXIF data: ${exifData}`);
 
-    const visionResult = await openAi.beta.chat.completions.parse({
-      "model": "gpt-4o",
-      messages: [
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "text",
-              "text": "Create a title, description, and alt text for this image"
-            },
-            {
-              "type": "image_url",
-              "image_url": {
-                "url": `data:${type};base64,${buffer.toString('base64')}`
-              }
-            }
-          ]
-        }
-      ],
-      response_format: zodResponseFormat(ImageAnalysisResultObject, "image_analysis_result")
-    });
+    const visionResult = await getVisionAnalysisResult(type, buffer);
 
-    const visionResultParsed = visionResult.choices[0].message.parsed;
+    if (!visionResult) {
+      throw new Error('No analysis');
+    }
 
     uploadResults.push({
-      visionAnalysis: visionResultParsed,
+      visionAnalysis: visionResult,
       exifData,
-      pinataCid: upload.cid
-    });
+      pinataCid: upload.cid,
+      hash: imageHash
+    }); // TODO: Add preview URL with Pinata gateway
   }
 
-  const rows = uploadResults.map(result => {
+  const rows: UploadRow[] = uploadResults.map(result => {
+    const {hash, ...resultFields} = result;
     return {
-      upload: result,
-      hash: "qwerty"
+      upload: resultFields,
+      hash
     };
   });
-  const {data, error} = await supabase.from("uploads").insert(rows);
+  const { data, error } = await supabase.from("uploads").insert(rows);
 
   console.log(data);
   console.error(error);
@@ -89,13 +63,4 @@ export async function POST(request: Request) {
   tmpDir.removeCallback();
 
   return NextResponse.json(uploadResults);
-}
-
-export async function GET() {
-  const { data, error } = await supabase.from("uploads").select();
-
-  console.log(data);
-  console.error(error);
-
-  return NextResponse.json(data);
 }
