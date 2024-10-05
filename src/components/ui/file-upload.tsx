@@ -20,8 +20,12 @@ function FileUpload() {
       fetch('/api/upload', {
         method: 'POST',
         body: formData
-      }).then(response => {
+      }).then(async (response) => {
         if (!response.ok) {
+          const errorData = await response.json();
+
+          if (errorData) throw new Error(errorData.message);
+          
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();

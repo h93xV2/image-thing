@@ -1,20 +1,19 @@
 import crypto from 'crypto';
-import { createClient } from "@supabase/supabase-js";
-import { FileData } from './types';
+import { FileData } from '@lib/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!); // TODO: Add auth later with user keys
+async function getUploads(supabase: SupabaseClient) {
+  const { data, error } = await supabase.from("uploads").select('*');
 
-async function getUploads() { // TODO: Make this scoped to user after adding auth.
-  const { data, error } = await supabase.from("uploads").select('*', {head: true, count: 'exact'});
-
-  console.log(data);
+  console.log(`Uploads data: ${data}`);
+  console.error(`Uploads error: ${error}`);
 
   // TODO: Handler error.
 
   return data;
 }
 
-async function getNewFileUploads(files: File[]) {
+async function getNewFileUploads(supabase: SupabaseClient, files: File[]) {
   const hashToFileData: Map<string, FileData> = new Map();
 
   for (let i = 0; i < files.length; i++) {
@@ -49,4 +48,4 @@ function hashImage(imageBuffer: Buffer): string {
   return hash.digest('hex');
 }
 
-export {supabase, getUploads, getNewFileUploads}
+export {getUploads, getNewFileUploads}

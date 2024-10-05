@@ -3,12 +3,21 @@ import * as fs from "fs";
 import path from "path";
 import exifr from "exifr";
 import { NextResponse } from "next/server";
-import { getVisionAnalysisResult } from "@/lib/openai";
-import { getNewFileUploads, supabase } from "@/lib/supabase";
-import pinata from "@/lib/pinata";
-import { UploadRow } from "@/lib/types";
+import { getVisionAnalysisResult } from "@lib/openai";
+import { getNewFileUploads } from "@lib/supabase";
+import pinata from "@lib/pinata";
+import { UploadRow } from "@lib/types";
+import { createClient } from "@lib/supabase/server";
 
 export async function POST(request: Request) {
+  const supabase = createClient();
+  const userResponse = await supabase.auth.getUser();
+
+  if (userResponse.error || !userResponse.data?.user) {
+    return NextResponse.json({ message: 'User is not signed in' }, { status: 401 });
+  }
+
+  const userId = userResponse.data.user.id;
   const formData = await request.formData();
   const files: File[] = formData.getAll('files').filter(file => file instanceof File);
   const tmpDir = tmp.dirSync({ unsafeCleanup: true });
@@ -16,7 +25,7 @@ export async function POST(request: Request) {
 
   console.log(`tmpDir ${tmpDir.name}`);
 
-  const newFiles = await getNewFileUploads(files);
+  const newFiles = await getNewFileUploads(supabase, files);
 
   for (let i = 0; i < newFiles.length; i++) {
     const {file, buffer, imageHash} = newFiles[i];
@@ -50,7 +59,8 @@ export async function POST(request: Request) {
     const {hash, ...resultFields} = result;
     return {
       upload: resultFields,
-      hash
+      hash,
+      user_id: userId
     };
   });
   const { data, error } = await supabase.from("uploads").insert(rows);

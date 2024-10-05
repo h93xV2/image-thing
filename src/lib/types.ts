@@ -13,7 +13,8 @@ type UploadRow = {
     exifData?: any,
     pinataCid: string
   },
-  hash: string
+  hash: string,
+  user_id: string
 };
 
 type RetrievedUploadRow = UploadRow & {

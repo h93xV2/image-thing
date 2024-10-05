@@ -1,4 +1,4 @@
-import pinata from "@/lib/pinata";
+import pinata from "@lib/pinata";
 import { NextResponse } from "next/server";
 
 type PreviewRequest = {

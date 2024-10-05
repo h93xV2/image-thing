@@ -7,16 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { RetrievedUploadRow } from "@/lib/types";
+} from "@components/ui/table"
+import { RetrievedUploadRow } from "@lib/types";
 import {
   ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable
 } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import PreviewButton from "./preview-button";
+import { createClient } from "@lib/supabase/client";
 
 const columns: ColumnDef<RetrievedUploadRow>[] = [
   {
@@ -74,6 +74,8 @@ export default function UploadsTable(props: Props) {
     },
   });
 
+  const supabase = createClient(); // TODO: Check the user is logged in like on the home page.
+
   useEffect(() => {
     const channel = supabase
       .channel("realtime uploads")
@@ -93,7 +95,7 @@ export default function UploadsTable(props: Props) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase])
+  }, [supabase, data]);
 
   return (
     <div className="rounded-md border max-w-7xl mx-auto mt-10">
@@ -135,6 +137,7 @@ export default function UploadsTable(props: Props) {
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
+              {/* TODO: Make a loading thing first before no results */}
             </TableRow>
           )}
         </TableBody>
