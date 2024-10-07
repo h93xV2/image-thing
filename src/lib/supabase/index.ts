@@ -6,9 +6,11 @@ async function getUploads(supabase: SupabaseClient) {
   const { data, error } = await supabase.from("uploads").select('*');
 
   console.log(`Uploads data: ${data}`);
-  console.error(`Uploads error: ${error}`);
-
-  // TODO: Handler error.
+  
+  if (error) {
+    // TODO: Handler error in a meaningful way.
+    console.error(`Uploads error: ${error}`);
+  }
 
   return data;
 }

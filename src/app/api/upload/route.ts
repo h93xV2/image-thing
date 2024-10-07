@@ -6,8 +6,10 @@ import { NextResponse } from "next/server";
 import { getVisionAnalysisResult } from "@lib/openai";
 import { getNewFileUploads } from "@lib/supabase";
 import pinata from "@lib/pinata";
-import { UploadRow } from "@lib/types";
+import { DeleteRequest, UploadRow } from "@lib/types";
 import { createClient } from "@lib/supabase/server";
+
+const validImageTypes = new Set(['image/jpeg', 'image/png', 'image/avif']);
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -25,12 +27,13 @@ export async function POST(request: Request) {
 
   console.log(`tmpDir ${tmpDir.name}`);
 
-  const newFiles = await getNewFileUploads(supabase, files);
+  let newFiles = await getNewFileUploads(supabase, files);
+  newFiles = newFiles.filter(newFile => validImageTypes.has(newFile.file.type));
 
   for (let i = 0; i < newFiles.length; i++) {
     const {file, buffer, imageHash} = newFiles[i];
-    const upload = await pinata.upload.file(file); // TODO: Handle exceptions and prevent reuploading
-    const type = file.type; // TODO: Validate this is an image. Ex: image/jpeg
+    const upload = await pinata.upload.file(file); // TODO: Handle exceptions
+    const type = file.type;
     const tempFilePath = path.join(tmpDir.name, file.name);
 
     fs.writeFileSync(tempFilePath, buffer);
@@ -65,12 +68,41 @@ export async function POST(request: Request) {
   });
   const { data, error } = await supabase.from("uploads").insert(rows);
 
-  console.log(data);
-  console.error(error);
+  console.log(`Upload data: ${data}`);
+  console.error(`Upload error: ${error}`);
 
   // TODO: Rollback uploads from Pinata if DB insert fails.
 
   tmpDir.removeCallback();
 
-  return NextResponse.json(uploadResults);
+  // TODO: If zero files were uploaded then an error code should be returned.
+  return NextResponse.json({
+    uploadedFilesCount: rows.length,
+    filesCount: files.length
+  });
+}
+
+export async function DELETE(request: Request) {
+  const supabase = createClient();
+  const userResponse = await supabase.auth.getUser();
+
+  if (userResponse.error || !userResponse.data?.user) {
+    return NextResponse.json({ message: 'User is not signed in' }, { status: 401 });
+  }
+
+  const { pinataCids }: DeleteRequest = await request.json();
+
+  const deletedFiles = await pinata.files.delete(pinataCids);
+
+  console.log(`Pinata deleted files: ${JSON.stringify(deletedFiles)}`);
+
+  const {data, error} = await supabase.from('uploads').delete().in('upload->>pinataCid', pinataCids);
+
+  if (error) {
+    console.error(`Supabase delete error: ${JSON.stringify(error)}`); // TODO: Handle this better
+  }
+
+  console.log(`Supabase delete data: ${data}`)
+
+  return new Response();
 }

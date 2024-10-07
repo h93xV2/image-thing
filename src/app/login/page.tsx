@@ -1,40 +1,40 @@
 import { login } from './actions';
-import { Button } from '@components/ui/button'; // Example import, adapt as necessary
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@components/ui/card";
+import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
 
 export default function LoginPage() {
   return (
-    <form className="flex flex-col gap-4 p-6 max-w-md mx-auto bg-white shadow-md rounded-lg mt-10">
-      <div className="flex flex-col">
-        <label htmlFor="email" className="mb-2 text-sm font-medium text-gray-700">
-          Email:
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-indigo-200"
-        />
-      </div>
-
-      <div className="flex flex-col">
-        <label htmlFor="password" className="mb-2 text-sm font-medium text-gray-700">
-          Password:
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-indigo-200"
-        />
-      </div>
-
-      <div className="flex gap-2">
-        <Button formAction={login} className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg">
-          Log in
-        </Button>
-      </div>
+    <form className="flex justify-center max-w-md mx-auto mt-10">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" name="password" type="password" required />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button formAction={login} className="w-full">Log in</Button>
+        </CardFooter>
+      </Card>
     </form>
   );
 }

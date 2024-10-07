@@ -8,6 +8,7 @@ import { UploadStatus, UploadStatusBox } from './upload-status';
 function FileUpload() {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [warningMessage, setWarningMessage] = useState("");
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -31,8 +32,16 @@ function FileUpload() {
         return response.json();
       })
       .then(data => {
-        console.log(data);
-        setUploadStatus('success');
+        const { filesCount, uploadedFilesCount } = data;
+
+        if (uploadedFilesCount < filesCount) {
+          setUploadStatus("warning");
+          setWarningMessage(
+            `${uploadedFilesCount} of ${filesCount} files were successfully uploaded.`
+          );
+        } else {
+          setUploadStatus("success");
+        }
       })
       .catch(error => {
         console.error("Error fetching data:", error);
@@ -60,10 +69,10 @@ function FileUpload() {
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer ${
-            isDragActive ? 'border-blue-500' : 'border-gray-300'
+            isDragActive ? "border-blue-500" : "border-gray-300"
           }`}
         >
-          <input {...getInputProps()} onClick={() => setUploadStatus('idle')} />
+          <input {...getInputProps()} onClick={() => setUploadStatus("idle")} />
           {isDragActive ? (
             <p className="text-blue-500">Drop the files here ...</p>
           ) : (
@@ -79,7 +88,12 @@ function FileUpload() {
           </aside>
         )}
 
-        <UploadStatusBox uploadStatus={uploadStatus} errorMessage={errorMessage} />
+        {/* Display the Upload Status */}
+        <UploadStatusBox
+          uploadStatus={uploadStatus}
+          errorMessage={errorMessage}
+          warningMessage={warningMessage}  // Pass the warning message to the status box
+        />
       </CardContent>
     </Card>
   );

@@ -17,6 +17,7 @@ import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
 import PreviewButton from "./preview-button";
 import { createClient } from "@lib/supabase/client";
+import DeleteButton from "./delete-button";
 
 const columns: ColumnDef<RetrievedUploadRow>[] = [
   {
@@ -49,9 +50,14 @@ const columns: ColumnDef<RetrievedUploadRow>[] = [
   },
   {
     accessorKey: "upload.pinataCid",
-    header: "Preview",
+    header: "Options",
     cell: ({row}) => {
-      return <PreviewButton cid={row.original.upload.pinataCid} />
+      return (
+        <>
+          <PreviewButton cid={row.original.upload.pinataCid} className="mr-1" />
+          <DeleteButton cid={row.original.upload.pinataCid} />
+        </>
+      );
     }
   }
 ];
@@ -90,6 +96,17 @@ export default function UploadsTable(props: Props) {
           setData([...data, payload.new as RetrievedUploadRow]);
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "uploads",
+        },
+        (payload) => {
+          setData(data.filter((item) => item.id !== payload.old.id));
+        }
+      )
       .subscribe();
 
     return () => {
@@ -98,7 +115,7 @@ export default function UploadsTable(props: Props) {
   }, [supabase, data]);
 
   return (
-    <div className="rounded-md border max-w-7xl mx-auto mt-10">
+    <div className="rounded-md border mx-auto mt-10 ml-10 mr-10">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

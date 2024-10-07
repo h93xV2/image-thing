@@ -19,6 +19,7 @@ type UploadRow = {
 
 type RetrievedUploadRow = UploadRow & {
   created_at: string,
+  id: number
 };
 
 type FileData = {
@@ -27,4 +28,15 @@ type FileData = {
   imageHash: string
 }
 
-export {ImageAnalysisResultObject, type ImageAnalysisResult, type RetrievedUploadRow, type FileData, type UploadRow}
+type DeleteRequest = {
+  pinataCids: string[]
+};
+
+export {
+  ImageAnalysisResultObject,
+  type ImageAnalysisResult,
+  type RetrievedUploadRow,
+  type FileData,
+  type UploadRow,
+  type DeleteRequest
+}

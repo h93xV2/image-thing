@@ -8,6 +8,7 @@ interface PreviewButtonProps {
   buttonText?: string;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg';
+  className?: string;
 }
 
 const PreviewButton: React.FC<PreviewButtonProps> = ({
@@ -15,6 +16,7 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({
   buttonText = 'Preview',
   variant = 'default',
   size = 'default',
+  className,
   ...props
 }) => {
   const handleClick = () => {
@@ -31,7 +33,7 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({
 
   // TODO: Look into displaying a small thumbnail or open the image in an overlay
   return (
-    <Button variant={variant} size={size} onClick={handleClick} {...props}>
+    <Button className={className} variant={variant} size={size} onClick={handleClick} {...props}>
       {buttonText}
     </Button>
   );

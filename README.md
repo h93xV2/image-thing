@@ -2,6 +2,9 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+This project was created for the [Pinata Challenge](https://dev.to/challenges/pinata); it's an app which combines
+Pinata's file storage APIs with OpenAI's LLM models to provide unique features tailored towards image files.
+
 ## Underlying Technology
 - Pinata
 - OpenAI

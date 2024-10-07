@@ -1,14 +1,15 @@
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { LoaderCircle, CircleCheckBig, AlertCircle } from 'lucide-react'; 
+import { LoaderCircle, CircleCheckBig, AlertCircle, AlertTriangle } from 'lucide-react'; 
 
-type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error' | 'warning';
 
 type Props = {
   uploadStatus: UploadStatus,
-  errorMessage: string
+  errorMessage: string,
+  warningMessage: string
 };
 
-function UploadStatusBox({uploadStatus, errorMessage}: Props) {
+function UploadStatusBox({uploadStatus, errorMessage, warningMessage}: Props) {
   return (
     <>
       {/* Status messages */}
@@ -39,6 +40,16 @@ function UploadStatusBox({uploadStatus, errorMessage}: Props) {
               <div>
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
+              </div>
+            </Alert>
+          )}
+
+          {uploadStatus === 'warning' && (
+            <Alert className="bg-yellow-50 text-yellow-700 flex items-center">
+              <AlertTriangle className="mr-2 h-5 w-5" />
+              <div>
+                <AlertTitle>Warning</AlertTitle>
+                <AlertDescription>{warningMessage}</AlertDescription>
               </div>
             </Alert>
           )}
