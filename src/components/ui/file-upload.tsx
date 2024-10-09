@@ -63,7 +63,7 @@ function FileUpload() {
   return (
     <Card className="max-w-lg mx-auto mt-10">
       <CardHeader>
-        <h2 className="text-xl font-bold">Upload Files</h2>
+        <h2 className="text-xl font-bold">Upload Images</h2>
       </CardHeader>
       <CardContent>
         <div
@@ -74,16 +74,16 @@ function FileUpload() {
         >
           <input {...getInputProps()} onClick={() => setUploadStatus("idle")} />
           {isDragActive ? (
-            <p className="text-blue-500">Drop the files here ...</p>
+            <p className="text-blue-500">Drop the image files here ...</p>
           ) : (
             <p className="text-gray-500">
-              Drag & drop some files here, or click to select files
+              Drag & drop some image files here, or click to select files
             </p>
           )}
         </div>
         {files.length > 0 && (
           <aside className="mt-4">
-            <h4 className="font-medium">Files:</h4>
+            <h4 className="font-medium">Image Files:</h4>
             <ul>{files}</ul>
           </aside>
         )}

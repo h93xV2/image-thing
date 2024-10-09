@@ -18,15 +18,26 @@ import { ArrowUpDown } from "lucide-react";
 import PreviewButton from "./preview-button";
 import { createClient } from "@lib/supabase/client";
 import DeleteButton from "./delete-button";
+import PinButton from "./pin-button";
 
 const columns: ColumnDef<RetrievedUploadRow>[] = [
   {
-    accessorKey: "upload.visionAnalysis.title",
-    header: "Title",
+    accessorKey: "upload.fileName",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          File Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    }
   },
   {
-    accessorKey: "upload.visionAnalysis.altText",
-    header: "Alt Text"
+    accessorKey: "upload.visionAnalysis.title",
+    header: "Title",
   },
   {
     accessorKey: "created_at",
@@ -39,23 +50,25 @@ const columns: ColumnDef<RetrievedUploadRow>[] = [
           Created At
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )
+      );
     },
     cell: ({ row }) => {
       const createdAt = new Date(row.getValue("created_at"));
       const formatted = createdAt.toLocaleString();
  
-      return <div className="text-right font-medium">{formatted}</div>;
+      return <div className="text-left font-medium">{formatted}</div>;
     },
   },
   {
-    accessorKey: "upload.pinataCid",
+    accessorKey: "id",
     header: "Options",
     cell: ({row}) => {
+      const {pinata_cid_private, id, is_pinned} = row.original;
       return (
         <>
-          <PreviewButton cid={row.original.upload.pinataCid} className="mr-1" />
-          <DeleteButton cid={row.original.upload.pinataCid} />
+          <PreviewButton pinataCid={pinata_cid_private}/>
+          <PinButton id={id} isInitiallyPinned={is_pinned} />
+          <DeleteButton id={id} />
         </>
       );
     }
@@ -93,7 +106,7 @@ export default function UploadsTable(props: Props) {
           table: "uploads"
         },
         (payload) => {
-          setData([...data, payload.new as RetrievedUploadRow]);
+          setData((prevData) => [...prevData, payload.new as RetrievedUploadRow]);
         }
       )
       .on(
@@ -104,7 +117,22 @@ export default function UploadsTable(props: Props) {
           table: "uploads",
         },
         (payload) => {
-          setData(data.filter((item) => item.id !== payload.old.id));
+          setData((prevData) => prevData.filter((item) => item.id !== payload.old.id));
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "uploads",
+        },
+        (payload) => {
+          setData((prevData) =>
+            prevData.map((item) =>
+              item.id === payload.new.id ? (payload.new as RetrievedUploadRow) : item
+            )
+          );
         }
       )
       .subscribe();
@@ -154,7 +182,6 @@ export default function UploadsTable(props: Props) {
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
-              {/* TODO: Make a loading thing first before no results */}
             </TableRow>
           )}
         </TableBody>

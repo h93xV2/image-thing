@@ -10,11 +10,14 @@ type ImageAnalysisResult = z.infer<typeof ImageAnalysisResultObject>;
 type UploadRow = {
   upload: {
     visionAnalysis: ImageAnalysisResult,
-    exifData?: any,
-    pinataCid: string
+    fileName: string
   },
   hash: string,
-  user_id: string
+  user_id: string,
+  is_pinned: boolean,
+  pinata_cid_private: string,
+  pinata_id: string,
+  pinata_cid_public?: string
 };
 
 type RetrievedUploadRow = UploadRow & {
@@ -29,7 +32,15 @@ type FileData = {
 }
 
 type DeleteRequest = {
-  pinataCids: string[]
+  ids: number[]
+};
+
+type PreviewRequest = {
+  pinataCid: string
+};
+
+type PinRequest = {
+  id: number
 };
 
 export {
@@ -38,5 +49,7 @@ export {
   type RetrievedUploadRow,
   type FileData,
   type UploadRow,
-  type DeleteRequest
+  type DeleteRequest,
+  type PreviewRequest,
+  type PinRequest
 }

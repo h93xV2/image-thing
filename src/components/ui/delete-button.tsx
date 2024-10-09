@@ -1,34 +1,39 @@
 'use client';
 
-import * as React from 'react';
 import { Button } from '@components/ui/button';
+import { DeleteRequest } from '@lib/types';
+import { Loader, Trash2 } from 'lucide-react';
+import { FC, useState } from 'react';
 
 interface DeleteButtonProps {
-  cid: string;
-  buttonText?: string;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg';
+  id: number;
 }
 
-const DeleteButton: React.FC<DeleteButtonProps> = ({
-  cid,
-  buttonText = 'Delete',
-  variant = 'destructive', // Default variant is destructive for a delete button
-  size = 'default',
+const DeleteButton: FC<DeleteButtonProps> = ({
+  id,
   ...props
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = () => {
+    setIsLoading(true);
+
+    const requestBody: DeleteRequest = { ids: [id] };
+
     fetch('/api/upload', {
       method: 'DELETE',
-      body: JSON.stringify({ pinataCids: [cid] })
-    }).then(() => {
-      console.log('Delete successful');
-    }).catch(console.error);
+      body: JSON.stringify(requestBody)
+    })
+      .then(() => {
+        console.log('Delete successful');
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   };
 
   return (
-    <Button variant={variant} size={size} onClick={handleClick} {...props}>
-      {buttonText}
+    <Button variant="ghost" size="icon" onClick={handleClick} {...props} disabled={isLoading}>
+      {isLoading ? <Loader className="animate-spin" /> : <Trash2 color="red" />}
     </Button>
   );
 };

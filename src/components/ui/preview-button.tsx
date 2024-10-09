@@ -1,28 +1,24 @@
 'use client';
 
-import * as React from 'react';
+import { FC } from 'react';
 import { Button } from '@components/ui/button';
+import { ExternalLink } from 'lucide-react';
+import { PreviewRequest } from '@lib/types';
 
 interface PreviewButtonProps {
-  cid: string;
-  buttonText?: string;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg';
-  className?: string;
+  pinataCid: string;
 }
 
-const PreviewButton: React.FC<PreviewButtonProps> = ({
-  cid,
-  buttonText = 'Preview',
-  variant = 'default',
-  size = 'default',
-  className,
+const PreviewButton: FC<PreviewButtonProps> = ({
+  pinataCid,
   ...props
 }) => {
   const handleClick = () => {
+    const requestBody: PreviewRequest = { pinataCid };
+
     fetch('/api/preview', {
       method: 'POST',
-      body: JSON.stringify({cid})
+      body: JSON.stringify(requestBody)
     }).then(response => {
       response.json().then(data => {
         console.log(data.url);
@@ -33,8 +29,8 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({
 
   // TODO: Look into displaying a small thumbnail or open the image in an overlay
   return (
-    <Button className={className} variant={variant} size={size} onClick={handleClick} {...props}>
-      {buttonText}
+    <Button variant="ghost" size="icon" onClick={handleClick} {...props}>
+      <ExternalLink />
     </Button>
   );
 };
