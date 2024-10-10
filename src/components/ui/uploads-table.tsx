@@ -19,6 +19,7 @@ import PreviewButton from "./preview-button";
 import { createClient } from "@lib/supabase/client";
 import DeleteButton from "./delete-button";
 import PinButton from "./pin-button";
+import CopyImageTagButton from "./copy-button";
 
 const columns: ColumnDef<RetrievedUploadRow>[] = [
   {
@@ -63,10 +64,12 @@ const columns: ColumnDef<RetrievedUploadRow>[] = [
     accessorKey: "id",
     header: "Options",
     cell: ({row}) => {
-      const {pinata_cid_private, id, is_pinned} = row.original;
+      const {pinata_cid_private, pinata_cid_public, id, is_pinned} = row.original;
+      const url = `https://gateway.pinata.cloud/ipfs/${pinata_cid_public}`;
       return (
         <>
-          <PreviewButton pinataCid={pinata_cid_private}/>
+          { !is_pinned && <PreviewButton pinataCid={pinata_cid_private}/> }
+          { is_pinned && <CopyImageTagButton url={url} altText={row.original.upload.visionAnalysis.altText} /> }
           <PinButton id={id} isInitiallyPinned={is_pinned} />
           <DeleteButton id={id} />
         </>

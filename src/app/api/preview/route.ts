@@ -1,9 +1,16 @@
 import pinata from "@lib/pinata";
+import { createClient } from "@lib/supabase/server";
 import { PreviewRequest } from "@lib/types";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  // TODO: Verify the user is an authenticated user before allowing the url to be returned.
+  const supabase = createClient();
+  const userResponse = await supabase.auth.getUser();
+
+  if (userResponse.error || !userResponse.data?.user) {
+    return NextResponse.json({ message: 'User is not signed in' }, { status: 401 });
+  }
+
   const { pinataCid }: PreviewRequest = await request.json();
   
   console.log(`Preview Pinata CID: ${pinataCid}`);

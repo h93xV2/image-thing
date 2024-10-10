@@ -65,11 +65,6 @@ export async function POST(request: Request) {
   });
 }
 
-/**
- * TODO: Must unpin public file before deleting.
- * @param request 
- * @returns 
- */
 export async function DELETE(request: Request) {
   const supabase = createClient();
   const userResponse = await supabase.auth.getUser();
@@ -89,6 +84,13 @@ export async function DELETE(request: Request) {
   const pinataIds: string[] = data.map(row => row.pinata_id);
 
   console.log(`Pinata ID for delete: ${pinataIds}`);
+
+  const publicCids = data.filter(row => row.is_pinned).map(row => row.pinata_cid_public);
+
+  if (publicCids.length > 0) {
+    await pinataWeb3.unpin(publicCids);
+    console.log(`Pinata unpinned files: ${JSON.stringify(publicCids)}`);
+  }
 
   const deletedFiles = await pinata.files.delete(pinataIds);
 

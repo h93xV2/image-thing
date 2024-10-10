@@ -19,8 +19,6 @@ export default async function Home() {
     redirect('/login');
   }
 
-  // TODO: Logout button.
-
   const uploads = await getUploads(supabase) ?? [];
 
   return (
