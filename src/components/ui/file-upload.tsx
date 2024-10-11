@@ -88,11 +88,10 @@ function FileUpload() {
           </aside>
         )}
 
-        {/* Display the Upload Status */}
         <UploadStatusBox
           uploadStatus={uploadStatus}
           errorMessage={errorMessage}
-          warningMessage={warningMessage}  // Pass the warning message to the status box
+          warningMessage={warningMessage}
         />
       </CardContent>
     </Card>

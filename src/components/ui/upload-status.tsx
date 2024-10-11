@@ -12,7 +12,6 @@ type Props = {
 function UploadStatusBox({uploadStatus, errorMessage, warningMessage}: Props) {
   return (
     <>
-      {/* Status messages */}
       <div className="mt-4">
           {uploadStatus === 'uploading' && (
             <Alert className="bg-blue-50 text-blue-700 flex items-center">

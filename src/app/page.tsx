@@ -24,7 +24,6 @@ export default async function Home() {
     <div>
       <NavigationMenu className="w-full p-4">
         <NavigationMenuList id="list" className="flex w-full justify-end max-w-7xl mx-auto">
-          {/* Right-aligned Logout Button using shadcn's Button component */}
           <NavigationMenuItem>
             <LogOutButton />
           </NavigationMenuItem>

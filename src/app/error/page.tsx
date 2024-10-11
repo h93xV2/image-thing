@@ -16,7 +16,7 @@ export default function ErrorPage() {
     <div className="flex justify-center max-w-md mx-auto mt-10">
       <Card className="w-full max-w-sm">
         <CardHeader className="flex items-center justify-center space-y-2">
-          <AlertCircle className="text-red-500 w-10 h-10" />  {/* Lucide Icon */}
+          <AlertCircle className="text-red-500 w-10 h-10" />
           <CardTitle className="text-2xl">Oops! Something went wrong</CardTitle>
           <CardDescription>
             We&apos;re sorry, but an unexpected error has occurred.

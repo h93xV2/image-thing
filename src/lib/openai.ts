@@ -3,7 +3,7 @@ import { ImageAnalysisResultObject } from "./types";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 
 const openAi = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
+  apiKey: process.env['OPENAI_API_KEY'],
 });
 
 async function getVisionAnalysisResult(imageType: string, buffer: Buffer) {
