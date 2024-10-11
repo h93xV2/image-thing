@@ -36,8 +36,8 @@ const columns: ColumnDef<RetrievedUploadRow>[] = [
     }
   },
   {
-    accessorKey: "upload.visionAnalysis.title",
-    header: "Title",
+    accessorKey: "upload.visionAnalysis.caption",
+    header: "Caption",
   },
   {
     accessorKey: "created_at",

@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 const ImageAnalysisResultObject = z.object({
-  description: z.string(),
   altText: z.string(),
-  title: z.string()
+  caption: z.string()
 });
 type ImageAnalysisResult = z.infer<typeof ImageAnalysisResultObject>;
 

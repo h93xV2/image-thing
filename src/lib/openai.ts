@@ -15,7 +15,7 @@ async function getVisionAnalysisResult(imageType: string, buffer: Buffer) {
         "content": [
           {
             "type": "text",
-            "text": "Create a title, description, and alt text for this image"
+            "text": "Create an alt text and short caption for this image"
           },
           {
             "type": "image_url",
