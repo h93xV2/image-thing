@@ -12,11 +12,10 @@ import { RetrievedUploadRow } from "@lib/types";
 import {
   ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "./button";
 import { ArrowUpDown } from "lucide-react";
 import PreviewButton from "./preview-button";
-import { createClient } from "@lib/supabase/client";
 import DeleteButton from "./delete-button";
 import PinButton from "./pin-button";
 import CopyImageTagButton from "./copy-button";
@@ -84,9 +83,8 @@ type Props = {
 
 export default function UploadsTable(props: Props) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [data, setData] = useState(props.data);
   const table = useReactTable({
-    data,
+    data: props.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -96,57 +94,8 @@ export default function UploadsTable(props: Props) {
     },
   });
 
-  const supabase = createClient(); // TODO: Check the user is logged in like on the home page.
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("realtime uploads")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "uploads"
-        },
-        (payload) => {
-          setData((prevData) => [...prevData, payload.new as RetrievedUploadRow]);
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "uploads",
-        },
-        (payload) => {
-          setData((prevData) => prevData.filter((item) => item.id !== payload.old.id));
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "uploads",
-        },
-        (payload) => {
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === payload.new.id ? (payload.new as RetrievedUploadRow) : item
-            )
-          );
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase, data]);
-
   return (
-    <div className="rounded-md border mx-auto mt-10 ml-10 mr-10">
+    <div className="rounded-md border mx-auto">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

@@ -61,7 +61,7 @@ function FileUpload() {
   ));
 
   return (
-    <Card className="max-w-lg mx-auto mt-10">
+    <Card className="max-w-lg">
       <CardHeader>
         <h2 className="text-xl font-bold">Upload Images</h2>
       </CardHeader>

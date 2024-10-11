@@ -27,7 +27,6 @@ const PreviewButton: FC<PreviewButtonProps> = ({
     })
   };
 
-  // TODO: Look into displaying a small thumbnail or open the image in an overlay
   return (
     <Button variant="ghost" size="icon" onClick={handleClick} {...props}>
       <ExternalLink />

@@ -16,7 +16,19 @@ Pinata's file storage APIs with OpenAI's LLM models to provide unique features t
 
 ### Database
 
-One must first set up a database. This application uses Supabase.
+One must first set up a database. This application uses Supabase. A table needs to be set up with the following columns:
+1. `id int8`
+2. `created_at timestamptz`
+3. `upload jsonb`
+4. `hash text`
+5. `user_id uuid`
+6. `is_pinned bool`
+7. `pinata_id text`
+8. `pinata_cid_private text`
+9. `pinata_cid_public text`
+
+After that, policies need to be created for `SELECT`, `UPDATE`, `INSERT`, and `DELETE` to allow only authorized users
+to access rows in the table. The table should have row-level security (RLS) enabled.
 
 ### Environment Variables
 
@@ -46,9 +58,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## TODO
-
-1. Document database setup (or write a script to do it automatically).
-2. Document environment variables.
-3. Document the technology.

@@ -5,11 +5,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 async function getUploads(supabase: SupabaseClient) {
   const { data, error } = await supabase.from("uploads").select('*');
 
-  console.log(`Uploads data: ${data}`);
-  
   if (error) {
-    // TODO: Handler error in a meaningful way.
-    console.error(`Uploads error: ${error}`);
+    console.error(`Uploads error: ${JSON.stringify(error)}`);
+
+    throw new Error("Unable to retrieve uploads data");
   }
 
   return data;
@@ -33,12 +32,12 @@ async function getNewFileUploads(supabase: SupabaseClient, files: File[]) {
   const { data, error } = await supabase.from("uploads").select('hash').in('hash', Array.from(hashToFileData.keys()));
 
   if (error) {
-    console.error(error); // TODO: Make this better
+    console.error(`Unable to retrieve uploads based on hash: ${JSON.stringify(error)}`);
+
+    throw new Error('Unable to retrieve uploads based on hash');
   }
 
   data?.forEach(row => hashToFileData.delete(row.hash));
-
-  // TODO: Somehow communicate to the client that some files were not uploaded.
 
   return Array.from(hashToFileData.values());
 }

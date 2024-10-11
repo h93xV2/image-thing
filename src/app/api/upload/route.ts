@@ -25,27 +25,31 @@ export async function POST(request: Request) {
   newFiles = newFiles.filter(newFile => validImageTypes.has(newFile.file.type));
 
   for (let i = 0; i < newFiles.length; i++) {
-    const {file, buffer, imageHash} = newFiles[i];
-    const upload = await pinata.upload.file(file); // TODO: Handle exceptions
-    const type = file.type;
+    try {
+      const {file, buffer, imageHash} = newFiles[i];
+      const upload = await pinata.upload.file(file);
+      const type = file.type;
 
-    const visionResult = await getVisionAnalysisResult(type, buffer);
+      const visionResult = await getVisionAnalysisResult(type, buffer);
 
-    if (!visionResult) {
-      throw new Error('No analysis');
+      if (!visionResult) {
+        throw new Error('No analysis');
+      }
+
+      uploadResults.push({
+        upload: {
+          visionAnalysis: visionResult,
+          fileName: file.name,
+        },
+        pinata_cid_private: upload.cid,
+        pinata_id: upload.id,
+        hash: imageHash,
+        is_pinned: false,
+        user_id: userId
+      });
+    } catch (err) {
+      console.error(err);
     }
-
-    uploadResults.push({
-      upload: {
-        visionAnalysis: visionResult,
-        fileName: file.name,
-      },
-      pinata_cid_private: upload.cid,
-      pinata_id: upload.id,
-      hash: imageHash,
-      is_pinned: false,
-      user_id: userId
-    });
   }
 
   const { error } = await supabase.from("uploads").insert(uploadResults);
@@ -58,7 +62,10 @@ export async function POST(request: Request) {
     return NextResponse.json({message: error.message}, {status: 500});
   }
 
-  // TODO: If zero files were uploaded then an error code should be returned.
+  if (uploadResults.length === 0) {
+    return NextResponse.json({message: "No files could be uploaded"}, {status: 400});
+  }
+
   return NextResponse.json({
     uploadedFilesCount: uploadResults.length,
     filesCount: files.length
@@ -99,7 +106,9 @@ export async function DELETE(request: Request) {
   const deleteError = (await supabase.from('uploads').delete().in('pinata_id', pinataIds)).error;
 
   if (deleteError) {
-    console.error(`Supabase delete error: ${JSON.stringify(error)}`); // TODO: Handle this better
+    console.error(`Supabase delete error: ${JSON.stringify(error)}`);
+
+    return NextResponse.json({ message: "There was a problem deleting the record from the database" }, { status: 500 });
   }
 
   console.log(`Delete successful`)

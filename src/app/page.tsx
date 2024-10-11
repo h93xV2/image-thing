@@ -1,7 +1,5 @@
 import { redirect } from 'next/navigation';
 import { getUploads } from "@lib/supabase";
-import FileUpload from "@components/ui/file-upload";
-import UploadsTable from "@components/ui/uploads-table";
 import { createClient } from "@lib/supabase/server";
 import {
   NavigationMenu,
@@ -9,6 +7,7 @@ import {
   NavigationMenuList
 } from "@/components/ui/navigation-menu";
 import LogOutButton from '@components/ui/logout-button';
+import Uploads from '@components/ui/uploads';
 
 export default async function Home() {
   const supabase = createClient();
@@ -31,8 +30,7 @@ export default async function Home() {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <FileUpload />
-      <UploadsTable data={uploads} />
+      <Uploads uploads={uploads} />
     </div>
   );
 }
