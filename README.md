@@ -5,6 +5,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 This project was created for the [Pinata Challenge](https://dev.to/challenges/pinata); it's an app which combines
 Pinata's file storage APIs with OpenAI's LLM models to provide unique features tailored towards image files.
 
+See the submission for the challenge [here](https://dev.to/logarithmicspirals/effortless-image-tag-generation-streamline-your-workflow-with-pinata-and-ipfs-50a5).
+
 ## Technology
 
 - Pinata
